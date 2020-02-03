@@ -1,2 +1,2 @@
 # sort-visualizer
- This is a project I will be working on shortly (After Path Visualizer)
+This project visualizes the sorting of colors using various sorting algorithms (WIP)
