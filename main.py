@@ -6,28 +6,12 @@ import os
 import sys
 import time
 import colorsys
-import copy
 
 red = [255, 0, 0]
 green = [0, 255, 0]
 blue = [0, 0, 255]
 white = [255, 255, 255]
 black = [0, 0, 0]
-
-display_width = 600
-display_height = 300
-grid_width = 30
-grid_height = 15
-tile_width = display_width // grid_width
-tile_height = display_height // grid_height
-
-default_sleep_time = .1
-sleep_time = default_sleep_time
-
-os.environ['SDL_VIDEO_CENTERED'] = "0"
-pygame.init()
-screen = pygame.display.set_mode((display_width, display_height))
-screen.fill(white)
 
 
 class Tile:
@@ -54,6 +38,87 @@ class Tile:
         return self.color
 
 
+def make_board():
+    for y in range(grid_height):
+        temp = colors[:]
+        for x in range(grid_width):
+            grid[x, y] = Tile(x, y, temp.pop(random.randint(0, len(temp) - 1)))
+            print(grid[x, y])
+
+
+def selection_sort():
+    for y in range(grid_height):
+        for x in range(grid_width):
+            min_x = x
+            for next_x in range(x + 1, grid_width):
+                if grid[min_x, y].hue > grid[next_x, y].hue:
+                    min_x = next_x
+            time.sleep(step_time)
+            swap(grid[x, y], grid[min_x, y])
+
+
+def insertion_sort():
+    for y in range(grid_height):
+        for x in range(1, grid_width):
+            current = grid[x, y]
+            x_before = x - 1
+            while x_before >= 0 and current.hue < grid[x_before, y].hue:
+                grid[x_before + 1, y] = grid[x_before, y]
+                x_before -= 1
+            grid[x_before + 1, y].update_color(current.color)
+
+
+def swap(tile1, tile2):
+    temp = tile2.color[:]
+    tile2.update_color(tile1.color)
+    tile1.update_color(temp)
+
+
+def change_sort(index):
+    global current_sort_index
+    if index == "next":
+        if current_sort_index >= len(sorts) - 1:
+            current_sort_index = 0
+        else:
+            current_sort_index += 1
+    elif index == "back":
+        if current_sort_index <= 0:
+            current_sort_index = len(sorts) - 1
+        else:
+            current_sort_index += -1
+    else:
+        current_sort_index = index
+    pygame.display.set_caption(f"{sort_names[current_sort_index]} Sort")
+
+
+sort_names = [
+    "Selection",
+    "Insertion"
+]
+sorts = [
+    selection_sort,
+    insertion_sort
+]
+
+display_width = 600
+display_height = 300
+grid_width = 30
+grid_height = 15
+tile_width = display_width // grid_width
+tile_height = display_height // grid_height
+
+default_step_time = .1
+step_show = True
+step_time = default_step_time
+
+os.environ['SDL_VIDEO_CENTERED'] = "0"
+pygame.init()
+screen = pygame.display.set_mode((display_width, display_height))
+screen.fill(white)
+
+current_sort_index = 0
+pygame.display.set_caption(f"{sort_names[current_sort_index]} Sort")
+
 grid = numpy.empty((grid_width, grid_height), object)
 
 colors = []
@@ -68,31 +133,7 @@ for i in range(3):
                     colors.append(temp_color[:])
 print(len(colors), colors)
 
-
-def initialize():
-    for y in range(grid_height):
-        temp = colors[:]
-        for x in range(grid_width):
-            grid[x, y] = Tile(x, y, temp.pop(random.randint(0, len(temp) - 1)))
-            print(grid[x, y])
-
-
-def insertion_sort():
-    for y in range(grid_height):
-        for x in range(grid_width):
-            min_x = x
-            for next_x in range(x + 1, grid_width):
-                if grid[min_x, y].hue > grid[next_x, y].hue:
-                    min_x = next_x
-            swap(grid[x, y], grid[min_x, y])
-
-
-def swap(tile1, tile2):
-    temp = tile2.color[:]
-    tile2.update_color(tile1.color)
-    time.sleep(sleep_time)
-    tile1.update_color(temp)
-
+make_board()
 
 while True:
     for event in pygame.event.get():
@@ -101,6 +142,14 @@ while True:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F5:
-                initialize()
+                make_board()
             if event.key == pygame.K_RETURN:
-                insertion_sort()
+                sorts[current_sort_index]()
+            if event.key == pygame.K_RIGHT:
+                change_sort("next")
+            if event.key == pygame.K_LEFT:
+                change_sort("back")
+            if event.key == pygame.K_s:
+                step_show = not step_show
+                step_time = default_step_time if step_show else 0
+                print(f"Showing steps is {step_show}")
