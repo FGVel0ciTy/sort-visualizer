@@ -30,6 +30,11 @@ class Tile:
         return f"Tile at {self.x}, {self.y} with {self.color} color"
 
     def update_color(self, color):
+        try:
+            if self.color != color:
+                time.sleep(step_time)
+        except AttributeError:
+            pass
         self.color = color
         pygame.draw.rect(screen, color, (self.x * tile_width, self.y * tile_height, tile_width, tile_height))
         pygame.display.update((self.x * tile_width, self.y * tile_height, tile_width, tile_height))
@@ -52,9 +57,7 @@ def selection_sort():
             for next_x in range(x + 1, grid_width):
                 if grid[min_x, y].hue > grid[next_x, y].hue:
                     min_x = next_x
-            if min_x != x:
-                swap(grid[x, y], grid[min_x, y])
-                time.sleep(step_time)
+            swap(grid[x, y], grid[min_x, y])
 
 
 def insertion_sort():
@@ -66,9 +69,7 @@ def insertion_sort():
             while x_before >= 0 and current_hue < grid[x_before, y].hue:
                 grid[x_before + 1, y].update_color(grid[x_before, y].color)
                 x_before -= 1
-            if x_before + 1 != x:
-                grid[x_before + 1, y].update_color(current_col)
-                time.sleep(step_time)
+            grid[x_before + 1, y].update_color(current_col)
 
 
 def bubble_sort():
@@ -78,11 +79,48 @@ def bubble_sort():
             for current_x in range(0, grid_width - x - 1):
                 if grid[current_x, y].hue > grid[current_x + 1, y].hue:
                     swap(grid[current_x, y], grid[current_x + 1, y])
-                    time.sleep(step_time)
                     swapped = True
 
             if not swapped:
                 break
+
+
+def merge_sort():
+    for y in range(grid_height):
+        merge_sort_helper(list(range(0, grid_width)), y)
+
+
+def merge_sort_helper(indices, row):
+    if len(indices) > 1:
+        mid = len(indices) // 2
+        left = indices[:mid]
+        right = indices[mid:]
+
+        merge_sort_helper(left, row)
+        merge_sort_helper(right, row)
+        left = [[grid[idx, row].color, grid[idx, row].hue] for idx in left]
+        right = [[grid[idx, row].color, grid[idx, row].hue] for idx in right]
+
+        cur_l = cur_r = cur_ovrll = 0
+
+        while cur_l < len(left) and cur_r < len(right):
+            if left[cur_l][1] < right[cur_r][1]:
+                grid[indices[cur_ovrll], row].update_color(left[cur_l][0])
+                cur_l += 1
+            else:
+                grid[indices[cur_ovrll], row].update_color(right[cur_r][0])
+                cur_r += 1
+            cur_ovrll += 1
+
+        while cur_l < len(left):
+            grid[indices[cur_ovrll], row].update_color(left[cur_l][0])
+            cur_l += 1
+            cur_ovrll += 1
+
+        while cur_r < len(right):
+            grid[indices[cur_ovrll], row].update_color(right[cur_r][0])
+            cur_r += 1
+            cur_ovrll += 1
 
 
 def swap(tile1, tile2):
@@ -111,12 +149,14 @@ def change_sort(index):
 sort_names = [
     "Selection",
     "Insertion",
-    "Bubble"
+    "Bubble",
+    "Merge"
 ]
 sorts = [
     selection_sort,
     insertion_sort,
-    bubble_sort
+    bubble_sort,
+    merge_sort
 ]
 
 display_width = 600
@@ -126,7 +166,7 @@ grid_height = 10
 tile_width = display_width // grid_width
 tile_height = display_height // grid_height
 
-default_step_time = .05
+default_step_time = .01
 step_show = True
 step_time = default_step_time
 
