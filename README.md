@@ -8,4 +8,6 @@ Start Algorithm - Return or Enter
 
 Change Algorithm - Left/Right Arrow Keys
 
+Change Increment Size - Up/Down Arrow Keys
+
 Toggle step timer (Fast Step): s
