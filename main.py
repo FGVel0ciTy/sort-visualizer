@@ -7,15 +7,9 @@ import sys
 import time
 import colorsys
 
-red = [255, 0, 0]
-green = [0, 255, 0]
-blue = [0, 0, 255]
-white = [255, 255, 255]
-black = [0, 0, 0]
-
 
 class Tile:
-    def __init__(self, coord1, coord2=0, color=white):
+    def __init__(self, coord1, coord2=0, color=[0, 0, 0]):
         if isinstance(coord1, int):
             self.x = coord1
             self.y = coord2
@@ -41,13 +35,6 @@ class Tile:
         r, g, b = self.color
         self.hue = colorsys.rgb_to_hsv(r, g, b)[0]
         return self.color
-
-
-def make_board():
-    for y in range(grid_height):
-        temp = colors[:]
-        for x in range(grid_width):
-            grid[x, y] = Tile(x, y, temp.pop(random.randint(0, len(temp) - 1)))
 
 
 def selection_sort():
@@ -146,6 +133,53 @@ def change_sort(index):
     pygame.display.set_caption(f"{sort_names[current_sort_index]} Sort")
 
 
+def change_increment(index):
+    global current_increment_index, grid_width, display_width, tile_width, tile_height, screen, colors, grid
+    if index == "next":
+        if current_increment_index >= len(increments) - 1:
+            current_increment_index = 0
+        else:
+            current_increment_index += 1
+    elif index == "back":
+        if current_increment_index <= 0:
+            current_increment_index = len(increments) - 1
+        else:
+            current_increment_index += -1
+    else:
+        current_increment_index = index
+    grid_width = 255 // increments[current_increment_index][0] * 6
+    display_width = increments[current_increment_index][1]
+    tile_width = display_width // grid_width
+    tile_height = display_height // grid_height
+    screen = pygame.display.set_mode((display_width, display_height))
+    colors = make_colors()
+    grid = make_board()
+
+
+def make_colors():
+    result = []
+    for i in range(3):
+        for j in range(3):
+            temp_color = [0, 0, 0]
+            temp_color[i] = 255
+            if j != i:
+                for k in range(0, 256, increments[current_increment_index][0]):
+                    temp_color[j] = k
+                    if temp_color not in result:
+                        result.append(temp_color[:])
+    print(len(result))
+    return result
+
+
+def make_board():
+    result_grid = numpy.empty((grid_width, grid_height), object)
+    for y in range(grid_height):
+        temp = colors[:]
+        for x in range(grid_width):
+            result_grid[x, y] = Tile(x, y, temp.pop(random.randint(0, len(temp) - 1)))
+    return result_grid
+
+
 sort_names = [
     "Selection",
     "Insertion",
@@ -158,40 +192,38 @@ sorts = [
     bubble_sort,
     merge_sort
 ]
+increments = [
+    [85, 360],
+    [51, 600],
+    [17, 900],
+    [15, 918],
+    [5, 918],
+    [3, 1020]
+]
 
-display_width = 600
-display_height = 200
-grid_width = 30
+current_increment_index = 0
+
+grid_width = 255 // increments[current_increment_index][0] * 6
 grid_height = 10
+display_width = increments[current_increment_index][1]
+display_height = 200
 tile_width = display_width // grid_width
 tile_height = display_height // grid_height
 
-default_step_time = .01
+default_step_time = 1 / 500
 step_show = True
 step_time = default_step_time
 
 os.environ['SDL_VIDEO_CENTERED'] = "0"
 pygame.init()
 screen = pygame.display.set_mode((display_width, display_height))
-screen.fill(white)
 
 current_sort_index = 0
 pygame.display.set_caption(f"{sort_names[current_sort_index]} Sort")
 
-grid = numpy.empty((grid_width, grid_height), object)
+colors = make_colors()
 
-colors = []
-for i in range(3):
-    for j in range(3):
-        temp_color = [0, 0, 0]
-        temp_color[i] = 255
-        if j != i:
-            for k in range(0, 256, 51):
-                temp_color[j] = k
-                if temp_color not in colors:
-                    colors.append(temp_color[:])
-
-make_board()
+grid = make_board()
 
 while True:
     for event in pygame.event.get():
@@ -201,7 +233,7 @@ while True:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F5:
                 print("Resetting Board")
-                make_board()
+                grid = make_board()
                 print("Board Reset")
             if event.key == pygame.K_RETURN:
                 print("Sorting")
@@ -211,6 +243,10 @@ while True:
                 change_sort("next")
             if event.key == pygame.K_LEFT:
                 change_sort("back")
+            if event.key == pygame.K_UP:
+                change_increment("next")
+            if event.key == pygame.K_DOWN:
+                change_increment("back")
             if event.key == pygame.K_s:
                 step_show = not step_show
                 step_time = default_step_time if step_show else 0
