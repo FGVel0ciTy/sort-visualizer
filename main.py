@@ -66,8 +66,23 @@ def insertion_sort():
             while x_before >= 0 and current_hue < grid[x_before, y].hue:
                 grid[x_before + 1, y].update_color(grid[x_before, y].color)
                 x_before -= 1
-            grid[x_before + 1, y].update_color(current_col)
-            time.sleep(step_time)
+            if x_before + 1 != x:
+                grid[x_before + 1, y].update_color(current_col)
+                time.sleep(step_time)
+
+
+def bubble_sort():
+    for y in range(grid_height):
+        for x in range(grid_width):
+            swapped = False
+            for current_x in range(0, grid_width - x - 1):
+                if grid[current_x, y].hue > grid[current_x + 1, y].hue:
+                    swap(grid[current_x, y], grid[current_x + 1, y])
+                    time.sleep(step_time)
+                    swapped = True
+
+            if not swapped:
+                break
 
 
 def swap(tile1, tile2):
@@ -95,11 +110,13 @@ def change_sort(index):
 
 sort_names = [
     "Selection",
-    "Insertion"
+    "Insertion",
+    "Bubble"
 ]
 sorts = [
     selection_sort,
-    insertion_sort
+    insertion_sort,
+    bubble_sort
 ]
 
 display_width = 600
@@ -143,7 +160,9 @@ while True:
             sys.exit()
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_F5:
+                print("Resetting Board")
                 make_board()
+                print("Board Reset")
             if event.key == pygame.K_RETURN:
                 print("Sorting")
                 sorts[current_sort_index]()
