@@ -43,7 +43,6 @@ def make_board():
         temp = colors[:]
         for x in range(grid_width):
             grid[x, y] = Tile(x, y, temp.pop(random.randint(0, len(temp) - 1)))
-            print(grid[x, y])
 
 
 def selection_sort():
@@ -53,19 +52,22 @@ def selection_sort():
             for next_x in range(x + 1, grid_width):
                 if grid[min_x, y].hue > grid[next_x, y].hue:
                     min_x = next_x
-            time.sleep(step_time)
-            swap(grid[x, y], grid[min_x, y])
+            if min_x != x:
+                swap(grid[x, y], grid[min_x, y])
+                time.sleep(step_time)
 
 
 def insertion_sort():
     for y in range(grid_height):
         for x in range(1, grid_width):
-            current = grid[x, y]
+            current_hue = grid[x, y].hue
+            current_col = grid[x, y].color[:]
             x_before = x - 1
-            while x_before >= 0 and current.hue < grid[x_before, y].hue:
-                grid[x_before + 1, y] = grid[x_before, y]
+            while x_before >= 0 and current_hue < grid[x_before, y].hue:
+                grid[x_before + 1, y].update_color(grid[x_before, y].color)
                 x_before -= 1
-            grid[x_before + 1, y].update_color(current.color)
+            grid[x_before + 1, y].update_color(current_col)
+            time.sleep(step_time)
 
 
 def swap(tile1, tile2):
@@ -107,7 +109,7 @@ grid_height = 15
 tile_width = display_width // grid_width
 tile_height = display_height // grid_height
 
-default_step_time = .1
+default_step_time = .05
 step_show = True
 step_time = default_step_time
 
@@ -131,7 +133,6 @@ for i in range(3):
                 temp_color[j] = k
                 if temp_color not in colors:
                     colors.append(temp_color[:])
-print(len(colors), colors)
 
 make_board()
 
@@ -144,7 +145,9 @@ while True:
             if event.key == pygame.K_F5:
                 make_board()
             if event.key == pygame.K_RETURN:
+                print("Sorting")
                 sorts[current_sort_index]()
+                print("Sorted")
             if event.key == pygame.K_RIGHT:
                 change_sort("next")
             if event.key == pygame.K_LEFT:
