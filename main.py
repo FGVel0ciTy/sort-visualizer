@@ -103,9 +103,9 @@ sorts = [
 ]
 
 display_width = 600
-display_height = 300
+display_height = 200
 grid_width = 30
-grid_height = 15
+grid_height = 10
 tile_width = display_width // grid_width
 tile_height = display_height // grid_height
 
