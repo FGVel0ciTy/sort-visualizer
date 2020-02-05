@@ -1,5 +1,5 @@
 # sort-visualizer
-This project visualizes the sorting of colors using various sorting algorithms.
+This project visualizes the sorting of colors using various sorting algorithms. The workloads are also multithreaded so you can see the algorithm working in multiple lines.
 
 ## Controls
 Randomize the colors - F5
