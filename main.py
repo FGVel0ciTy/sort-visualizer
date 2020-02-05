@@ -6,6 +6,7 @@ import os
 import sys
 import time
 import colorsys
+import concurrent.futures
 
 
 class Tile:
@@ -38,43 +39,59 @@ class Tile:
 
 
 def selection_sort():
-    for y in range(grid_height):
-        for x in range(grid_width):
-            min_x = x
-            for next_x in range(x + 1, grid_width):
-                if grid[min_x, y].hue > grid[next_x, y].hue:
-                    min_x = next_x
-            swap(grid[x, y], grid[min_x, y])
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(selection_sort_helper, y)
+
+
+def selection_sort_helper(y):
+    for x in range(grid_width):
+        min_x = x
+        for next_x in range(x + 1, grid_width):
+            if grid[min_x, y].hue > grid[next_x, y].hue:
+                min_x = next_x
+        swap(grid[x, y], grid[min_x, y])
 
 
 def insertion_sort():
-    for y in range(grid_height):
-        for x in range(1, grid_width):
-            current_hue = grid[x, y].hue
-            current_col = grid[x, y].color[:]
-            x_before = x - 1
-            while x_before >= 0 and current_hue < grid[x_before, y].hue:
-                grid[x_before + 1, y].update_color(grid[x_before, y].color)
-                x_before -= 1
-            grid[x_before + 1, y].update_color(current_col)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(insertion_sort_helper, y)
+
+
+def insertion_sort_helper(y):
+    for x in range(1, grid_width):
+        current_hue = grid[x, y].hue
+        current_color = grid[x, y].color
+        x_before = x - 1
+        while x_before >= 0 and current_hue < grid[x_before, y].hue:
+            grid[x_before + 1, y].update_color(grid[x_before, y].color)
+            x_before -= 1
+        grid[x_before + 1, y].update_color(current_color)
 
 
 def bubble_sort():
-    for y in range(grid_height):
-        for x in range(grid_width):
-            swapped = False
-            for current_x in range(0, grid_width - x - 1):
-                if grid[current_x, y].hue > grid[current_x + 1, y].hue:
-                    swap(grid[current_x, y], grid[current_x + 1, y])
-                    swapped = True
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(bubble_sort_helper, y)
 
-            if not swapped:
-                break
+
+def bubble_sort_helper(y):
+    for x in range(grid_width):
+        swapped = False
+        for current_x in range(0, grid_width - x - 1):
+            if grid[current_x, y].hue > grid[current_x + 1, y].hue:
+                swap(grid[current_x, y], grid[current_x + 1, y])
+                swapped = True
+
+        if not swapped:
+            break
 
 
 def merge_sort():
-    for y in range(grid_height):
-        merge_sort_helper(list(range(0, grid_width)), y)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(merge_sort_helper, list(range(0, grid_width)), y)
 
 
 def merge_sort_helper(indices, row):
@@ -204,9 +221,9 @@ increments = [
 current_increment_index = 0
 
 grid_width = 255 // increments[current_increment_index][0] * 6
-grid_height = 10
+grid_height = 8
 display_width = increments[current_increment_index][1]
-display_height = 200
+display_height = 360
 tile_width = display_width // grid_width
 tile_height = display_height // grid_height
 
@@ -214,6 +231,7 @@ default_step_time = 1 / 500
 step_show = True
 step_time = default_step_time
 
+max_threads = 4
 os.environ['SDL_VIDEO_CENTERED'] = "0"
 pygame.init()
 screen = pygame.display.set_mode((display_width, display_height))
