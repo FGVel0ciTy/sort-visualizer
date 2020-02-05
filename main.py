@@ -219,7 +219,6 @@ sorts = [
     insertion_sort,
     bubble_sort,
     merge_sort,
-    quick_sort,
     multi_algorithm
 ]
 increments = [
