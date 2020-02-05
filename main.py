@@ -127,6 +127,15 @@ def merge_sort_helper(indices, row):
             cur_ovrll += 1
 
 
+def multi_algorithm():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(0, grid_height, 4):
+            executor.submit(bubble_sort_helper, y)
+            executor.submit(insertion_sort_helper, y + 1)
+            executor.submit(merge_sort_helper, list(range(0, grid_width)), y + 2)
+            executor.submit(selection_sort_helper, y + 3)
+
+
 def swap(tile1, tile2):
     temp = tile2.color[:]
     tile2.update_color(tile1.color)
@@ -201,13 +210,15 @@ sort_names = [
     "Selection",
     "Insertion",
     "Bubble",
-    "Merge"
+    "Merge",
+    "Multi-Algorithm"
 ]
 sorts = [
     selection_sort,
     insertion_sort,
     bubble_sort,
-    merge_sort
+    merge_sort,
+    multi_algorithm
 ]
 increments = [
     [85, 360],
