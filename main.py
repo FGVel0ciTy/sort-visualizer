@@ -91,7 +91,7 @@ def bubble_sort_helper(y):
 def merge_sort():
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         for y in range(grid_height):
-            executor.submit(merge_sort_helper, list(range(0, grid_width)), y)
+            executor.submit(merge_sort_helper, range(0, grid_width), y)
 
 
 def merge_sort_helper(indices, row):
@@ -102,29 +102,29 @@ def merge_sort_helper(indices, row):
 
         merge_sort_helper(left, row)
         merge_sort_helper(right, row)
-        left = [[grid[idx, row].color, grid[idx, row].hue] for idx in left]
-        right = [[grid[idx, row].color, grid[idx, row].hue] for idx in right]
+        left = [[grid[index, row].color, grid[index, row].hue] for index in left]
+        right = [[grid[index, row].color, grid[index, row].hue] for index in right]
 
-        cur_l = cur_r = cur_ovrll = 0
+        cur_l = cur_r = cur_overall = 0
 
         while cur_l < len(left) and cur_r < len(right):
             if left[cur_l][1] < right[cur_r][1]:
-                grid[indices[cur_ovrll], row].update_color(left[cur_l][0])
+                grid[indices[cur_overall], row].update_color(left[cur_l][0])
                 cur_l += 1
             else:
-                grid[indices[cur_ovrll], row].update_color(right[cur_r][0])
+                grid[indices[cur_overall], row].update_color(right[cur_r][0])
                 cur_r += 1
-            cur_ovrll += 1
+            cur_overall += 1
 
         while cur_l < len(left):
-            grid[indices[cur_ovrll], row].update_color(left[cur_l][0])
+            grid[indices[cur_overall], row].update_color(left[cur_l][0])
             cur_l += 1
-            cur_ovrll += 1
+            cur_overall += 1
 
         while cur_r < len(right):
-            grid[indices[cur_ovrll], row].update_color(right[cur_r][0])
+            grid[indices[cur_overall], row].update_color(right[cur_r][0])
             cur_r += 1
-            cur_ovrll += 1
+            cur_overall += 1
 
 
 def multi_algorithm():
@@ -211,6 +211,7 @@ sort_names = [
     "Insertion",
     "Bubble",
     "Merge",
+    "Quick",
     "Multi-Algorithm"
 ]
 sorts = [
@@ -218,6 +219,7 @@ sorts = [
     insertion_sort,
     bubble_sort,
     merge_sort,
+    quick_sort,
     multi_algorithm
 ]
 increments = [
@@ -280,3 +282,4 @@ while True:
                 step_show = not step_show
                 step_time = default_step_time if step_show else 0
                 print(f"Showing steps is {step_show}")
+    pygame.display.flip()
