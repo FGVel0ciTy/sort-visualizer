@@ -133,22 +133,22 @@ def quick_sort():
             executor.submit(quick_sort_helper, 0, grid_width - 1, y)
 
 
-def quick_sort_helper(low, high, row):
-    if low < high:
-        partition_index = partition(low, high, row)
-        quick_sort_helper(low, partition_index - 1, row)
-        quick_sort_helper(partition_index + 1, high, row)
+def quick_sort_helper(first_index, last_index, row):
+    if first_index < last_index:
+        partition_index = partition(first_index, last_index, row)
+        quick_sort_helper(first_index, partition_index - 1, row)
+        quick_sort_helper(partition_index + 1, last_index, row)
 
 
-def partition(low, high, row):
-    pivot = grid[high, row]
-    smaller_index = low - 1
+def partition(first_index, last_index, row):
+    pivot = grid[last_index, row]
+    smaller_index = first_index - 1
 
-    for current_index in range(low, high):
+    for current_index in range(first_index, last_index):
         if grid[current_index, row].hue < pivot.hue:
             smaller_index += 1
             swap(grid[smaller_index, row], grid[current_index, row])
-    swap(grid[smaller_index + 1, row], grid[high, row])
+    swap(grid[smaller_index + 1, row], grid[last_index, row])
     return smaller_index + 1
 
 
