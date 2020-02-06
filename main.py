@@ -127,6 +127,31 @@ def merge_sort_helper(indices, row):
             cur_overall += 1
 
 
+def quick_sort():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(quick_sort_helper, 0, grid_width - 1, y)
+
+
+def quick_sort_helper(low, high, row):
+    if low < high:
+        partition_index = partition(low, high, row)
+        quick_sort_helper(low, partition_index - 1, row)
+        quick_sort_helper(partition_index + 1, high, row)
+
+
+def partition(low, high, row):
+    pivot = grid[high, row]
+    smaller_index = low - 1
+
+    for current_index in range(low, high):
+        if grid[current_index, row].hue < pivot.hue:
+            smaller_index += 1
+            swap(grid[smaller_index, row], grid[current_index, row])
+    swap(grid[smaller_index + 1, row], grid[high, row])
+    return smaller_index + 1
+
+
 def multi_algorithm():
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         for y in range(0, grid_height, 4):
@@ -219,6 +244,7 @@ sorts = [
     insertion_sort,
     bubble_sort,
     merge_sort,
+    quick_sort,
     multi_algorithm
 ]
 increments = [
@@ -267,8 +293,10 @@ while True:
                 print("Board Reset")
             if event.key == pygame.K_RETURN:
                 print("Sorting")
+                start = time.time()
                 sorts[current_sort_index]()
-                print("Sorted")
+                elapsed = time.time() - start
+                print(f"Sorted in {elapsed} second(s)")
             if event.key == pygame.K_RIGHT:
                 change_sort("next")
             if event.key == pygame.K_LEFT:
