@@ -127,20 +127,20 @@ def merge_sort_helper(indices, row):
             cur_overall += 1
 
 
-def quick_sort():
+def quick_sort_last():
     with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
         for y in range(grid_height):
-            executor.submit(quick_sort_helper, 0, grid_width - 1, y)
+            executor.submit(quick_sort_last_helper, 0, grid_width - 1, y)
 
 
-def quick_sort_helper(first_index, last_index, row):
+def quick_sort_last_helper(first_index, last_index, row):
     if first_index < last_index:
-        partition_index = partition(first_index, last_index, row)
-        quick_sort_helper(first_index, partition_index - 1, row)
-        quick_sort_helper(partition_index + 1, last_index, row)
+        partition_index = partition_last(first_index, last_index, row)
+        quick_sort_last_helper(first_index, partition_index - 1, row)
+        quick_sort_last_helper(partition_index + 1, last_index, row)
 
 
-def partition(first_index, last_index, row):
+def partition_last(first_index, last_index, row):
     pivot = grid[last_index, row]
     smaller_index = first_index - 1
 
@@ -150,6 +150,37 @@ def partition(first_index, last_index, row):
             swap(grid[smaller_index, row], grid[current_index, row])
     swap(grid[smaller_index + 1, row], grid[last_index, row])
     return smaller_index + 1
+
+
+def quick_sort_random():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(quick_sort_random_helper, 0, grid_width - 1, y)
+
+
+def quick_sort_random_helper(first_index, last_index, row):
+    if first_index < last_index:
+        partition_index = partition_random_r(first_index, last_index, row)
+        quick_sort_random_helper(first_index, partition_index - 1, row)
+        quick_sort_random_helper(partition_index + 1, last_index, row)
+
+
+def partition_random_r(first_index, last_index, row):
+    random_pivot = random.randrange(first_index, last_index)
+    swap(grid[first_index, row], grid[random_pivot, row])
+    return partition_random(first_index, last_index, row)
+
+
+def partition_random(first_index, last_index, row):
+    pivot = grid[first_index, row]
+    smaller_index = first_index + 1
+
+    for current_index in range(first_index + 1, last_index + 1):
+        if grid[current_index, row].hue < pivot.hue:
+            swap(grid[smaller_index, row], grid[current_index, row])
+            smaller_index += 1
+    swap(pivot, grid[smaller_index - 1, row])
+    return smaller_index - 1
 
 
 def multi_algorithm():
@@ -236,7 +267,8 @@ sort_names = [
     "Insertion",
     "Bubble",
     "Merge",
-    "Quick",
+    "Quick (Last Item Pivot)",
+    "Quick (Random Item Pivot)",
     "Multi-Algorithm"
 ]
 sorts = [
@@ -244,7 +276,8 @@ sorts = [
     insertion_sort,
     bubble_sort,
     merge_sort,
-    quick_sort,
+    quick_sort_last,
+    quick_sort_random,
     multi_algorithm
 ]
 increments = [
