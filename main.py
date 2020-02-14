@@ -192,6 +192,46 @@ def multi_algorithm():
             executor.submit(selection_sort_helper, y + 3)
 
 
+def bucket_sort():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(bucket_sort_helper, y)
+
+
+def bucket_sort_helper(row):
+    sorted_references = []
+    buckets = grid_width
+
+    for i in range(buckets):
+        sorted_references.append([])
+
+    for x in range(grid_width):
+        sorted_references[int(buckets * grid[x, row].hue)].append(grid[x, row])
+
+    for j in range(buckets):
+        insertion_sort_bucket(sorted_references[j], row)
+
+    for j in range(buckets):
+        sorted_references[j] = [tile.color for tile in sorted_references[j]]
+
+    x = 0
+    for i in range(buckets):
+        for j in range(len(sorted_references[i])):
+            grid[x, row].update_color(sorted_references[i][j])
+            x += 1
+
+
+def insertion_sort_bucket(arr, row):
+    for index in range(1, len(arr)):
+        current_hue = arr[index].hue
+        current_color = arr[index].color
+        last_index = index - 1
+        while last_index >= 0 and current_hue < arr[last_index].hue:
+            grid[arr[last_index + 1].x, row].update_color(arr[last_index].color)
+            last_index -= 1
+        grid[arr[last_index + 1].x, row].update_color(current_color)
+
+
 def swap(tile1, tile2):
     temp = tile2.color[:]
     tile2.update_color(tile1.color)
@@ -269,6 +309,7 @@ sort_names = [
     "Merge",
     "Quick (Last Item Pivot)",
     "Quick (Random Item Pivot)",
+    "Bucket",
     "Multi-Algorithm"
 ]
 sorts = [
@@ -278,6 +319,7 @@ sorts = [
     merge_sort,
     quick_sort_last,
     quick_sort_random,
+    bucket_sort,
     multi_algorithm
 ]
 increments = [
