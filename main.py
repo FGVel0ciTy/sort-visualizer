@@ -200,7 +200,7 @@ def bucket_sort():
 
 def bucket_sort_helper(row):
     sorted_references = []
-    buckets = grid_width
+    buckets = int(grid_width ** .5)
 
     for i in range(buckets):
         sorted_references.append([])
