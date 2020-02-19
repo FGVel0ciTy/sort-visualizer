@@ -19,10 +19,10 @@ class Tile:
         self.coord = [self.x, self.y]
         self.color = self.update_color(color)
         r, g, b = self.color
-        self.hue = colorsys.rgb_to_hsv(r, g, b)[0]
+        self.hue = int(colorsys.rgb_to_hsv(r, g, b)[0] * 360)
 
     def __repr__(self):
-        return f"Tile at {self.x}, {self.y} with {self.color} color"
+        return f"Tile at {self.x}, {self.y} with {self.hue} degree"
 
     def update_color(self, color):
         try:
@@ -34,7 +34,7 @@ class Tile:
         pygame.draw.rect(screen, color, (self.x * tile_width, self.y * tile_height, tile_width, tile_height))
         pygame.display.update((self.x * tile_width, self.y * tile_height, tile_width, tile_height))
         r, g, b = self.color
-        self.hue = colorsys.rgb_to_hsv(r, g, b)[0]
+        self.hue = int(colorsys.rgb_to_hsv(r, g, b)[0] * 360)
         return self.color
 
 
@@ -206,7 +206,7 @@ def bucket_sort_helper(row):
         sorted_references.append([])
 
     for x in range(grid_width):
-        sorted_references[int(buckets * grid[x, row].hue)].append(grid[x, row])
+        sorted_references[int(buckets * (grid[x, row].hue / 360))].append(grid[x, row])
 
     for j in range(buckets):
         insertion_sort_bucket(sorted_references[j], row)
@@ -219,6 +219,47 @@ def bucket_sort_helper(row):
         for j in range(len(sorted_references[i])):
             grid[x, row].update_color(sorted_references[i][j])
             x += 1
+
+
+def radix_sort():
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_threads) as executor:
+        for y in range(grid_height):
+            executor.submit(radix_sort_helper, y)
+
+
+def radix_sort_helper(row):
+    references = []
+    for x in range(grid_width):
+        references.append(grid[x, row])
+
+    maximum = max([tile.hue for tile in references])
+    exp = 1
+    while maximum // exp > 0:
+        counting_sort(exp, references)
+        exp *= 10
+
+
+def counting_sort(place, references):
+
+    output = [0] * len(references)
+    count = [0] * 10
+
+    for i in range(len(references)):
+        index = references[i].hue // place
+        count[index % 10] += 1
+
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+
+    for i in range(len(references) - 1, -1, -1):
+        index = references[i].hue // place
+        output[count[index % 10] - 1] = references[i]
+        count[index % 10] -= 1
+
+    output = [tile.color for tile in output]
+
+    for i in range(0, len(references)):
+        references[i].update_color(output[i])
 
 
 def insertion_sort_bucket(arr, row):
@@ -310,6 +351,7 @@ sort_names = [
     "Quick (Last Item Pivot)",
     "Quick (Random Item Pivot)",
     "Bucket",
+    "Radix",
     "Multi-Algorithm"
 ]
 sorts = [
@@ -320,6 +362,7 @@ sorts = [
     quick_sort_last,
     quick_sort_random,
     bucket_sort,
+    radix_sort,
     multi_algorithm
 ]
 increments = [
