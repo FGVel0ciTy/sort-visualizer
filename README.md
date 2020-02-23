@@ -1,5 +1,5 @@
 # sort-visualizer
-This project visualizes the sorting of colors using various sorting algorithms. The workloads are also multithreaded so you can see the algorithm working in multiple lines (Multi-Algorithm Searching visualizes the differences pretty nicely). So far the algorithms implemented are Insertion, Selection, Bubble, Merge, and Quick Sorts. (Multi Algorithm Sorting uses the algorithms in this order: Bubble, Insertion, Merge, Selection)
+This project visualizes the sorting of colors using various sorting algorithms. The workloads are also multithreaded so you can see the algorithm working in multiple lines (Multi-Algorithm Searching visualizes the differences pretty nicely). So far the algorithms implemented are Insertion, Selection, Bubble, Merge, Quick, Bucket, and Radix Sorts. (Multi Algorithm Sorting uses the algorithms in this order: Bubble, Insertion, Merge, Selection)
 
 ## Setting Up
 You must have a python environment with [PyGame](https://www.pygame.org/) and the [NumPy](https://numpy.org/) modules.
